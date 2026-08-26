@@ -84,6 +84,7 @@ import {
   applyArchiveToPayload,
   type CachedFeedPayload,
 } from "@/lib/live-response";
+import { extensionTabs, type ExtensionTabId } from "@/components/extensions/registry";
 
 type Tab =
   | "today"
@@ -93,7 +94,8 @@ type Tab =
   | "audience"
   | "newsletters"
   | "tasks"
-  | "settings";
+  | "settings"
+  | ExtensionTabId;
 type SettingsSection =
   | "general"
   | "industry"
@@ -149,6 +151,11 @@ const nav: { id: Tab; label: string; icon: typeof Activity }[] = [
   { id: "audience", label: "Audience", icon: Users },
   { id: "newsletters", label: "Newsletters", icon: Newspaper },
   { id: "tasks", label: "Tasks", icon: ListTodo },
+  ...extensionTabs.map((tab) => ({
+    id: tab.id as Tab,
+    label: tab.label,
+    icon: tab.icon,
+  })),
 ];
 
 function classNames(...values: Array<string | false | null | undefined>) {
@@ -3766,6 +3773,9 @@ export function ControlCenter() {
         )}{" "}
         {activeTab === "tasks" && (
           <TasksView tasks={tasks} setTasks={setTasks} />
+        )}{" "}
+        {extensionTabs.map(({ id, View }) =>
+          activeTab === id ? <View key={id} /> : null,
         )}{" "}
         {activeTab === "settings" && (
           <SettingsView

@@ -17,3 +17,6 @@
 # typescript
 *.tsbuildinfo
 .gstack/
+
+# local machine service files
+/local/
