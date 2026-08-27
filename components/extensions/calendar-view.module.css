@@ -1,0 +1,86 @@
+.hoursGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0 18px;
+}
+
+.dayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dayOn,
+.dayOff {
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dayOn {
+  color: white;
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.dayOff {
+  color: var(--muted);
+  background: transparent;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.hero {
+  margin-top: 18px;
+  padding: 22px 24px;
+}
+
+.hero h2 {
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 26px;
+}
+
+.heroDetail {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.windowList {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.windowList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.windowList b {
+  margin-left: auto;
+  color: var(--teal);
+  font-family: var(--mono);
+}
+
+.busyLine {
+  margin-top: 10px;
+  color: var(--faint);
+  font-size: 9px;
+}

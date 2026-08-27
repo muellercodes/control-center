@@ -25,6 +25,7 @@ async function refreshAllCollectors() {
       "/api/live/audience",
       "/api/live/newsletters?refresh=1",
       "/api/live/github?refresh=1",
+      "/api/live/calendar?refresh=1",
     ].map(async (path) => {
       const response = await fetch(`${baseUrl}${path}`, {
         cache: "no-store",

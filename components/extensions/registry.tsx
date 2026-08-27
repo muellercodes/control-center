@@ -1,6 +1,7 @@
 "use client";
 
-import { GitPullRequest } from "lucide-react";
+import { CalendarClock, GitPullRequest } from "lucide-react";
+import { CalendarView } from "./calendar-view";
 import { GithubView } from "./github-view";
 
 /**
@@ -24,6 +25,12 @@ export const extensionTabs = [
     label: "GitHub",
     icon: GitPullRequest,
     View: GithubView,
+  },
+  {
+    id: "calendar",
+    label: "Calendar",
+    icon: CalendarClock,
+    View: CalendarView,
   },
 ] as const satisfies readonly ExtensionTab[];
 

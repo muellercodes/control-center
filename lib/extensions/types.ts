@@ -46,8 +46,42 @@ export type GithubExtensionSettings = {
   includeMentions: boolean;
 };
 
+export type CalendarExtensionSettings = {
+  googleClientId: string;
+  /** Empty means "just the primary calendar". */
+  calendarIds: string[];
+  workingHours: { startMinute: number; endMinute: number; days: number[] };
+  minimumBlockMinutes: number;
+  contextSwitchMinutes: number;
+  allDayBlocksDay: boolean;
+};
+
+export type CalendarDay = {
+  /** Local calendar date, YYYY-MM-DD. */
+  date: string;
+  busy: Array<{
+    start: string;
+    end: string;
+    title: string;
+    allDay: boolean;
+    response?: "accepted" | "tentative" | "declined" | "needsAction";
+  }>;
+  freeWindows: Array<{ start: string; end: string; minutes: number }>;
+  capacityMinutes: number;
+};
+
+export type CalendarFeedResponse = {
+  configured: boolean;
+  connected: boolean;
+  connectedEmail?: string;
+  checkedAt: string;
+  days: CalendarDay[];
+  errors: string[];
+};
+
 export type ExtensionSettings = {
   github: GithubExtensionSettings;
+  calendar: CalendarExtensionSettings;
 };
 
 /** What the API returns: identical, plus token presence but never the token. */
@@ -56,12 +90,20 @@ export type PublicExtensionSettings = {
     tokenSet: boolean;
     tokenSource: "none" | "settings" | "environment";
   };
+  calendar: CalendarExtensionSettings & {
+    googleClientSecretSet: boolean;
+    connected: boolean;
+    connectedEmail: string;
+  };
 };
 
 export type ExtensionSettingsUpdate = {
   github: GithubExtensionSettings & {
     token?: string;
     clearToken?: boolean;
+  };
+  calendar: CalendarExtensionSettings & {
+    googleClientSecret?: string;
   };
 };
 
@@ -72,5 +114,13 @@ export const emptyExtensionSettings: ExtensionSettings = {
     includeReviewRequests: true,
     includeAssignedIssues: true,
     includeMentions: false,
+  },
+  calendar: {
+    googleClientId: "",
+    calendarIds: [],
+    workingHours: { startMinute: 9 * 60, endMinute: 17 * 60, days: [1, 2, 3, 4, 5] },
+    minimumBlockMinutes: 25,
+    contextSwitchMinutes: 5,
+    allDayBlocksDay: false,
   },
 };
