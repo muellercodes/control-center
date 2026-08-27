@@ -1,7 +1,8 @@
 "use client";
 
-import { GitPullRequest } from "lucide-react";
+import { GitPullRequest, Telescope } from "lucide-react";
 import { GithubView } from "./github-view";
+import { ResearchView } from "./research-view";
 
 /**
  * The single place local tabs are declared.
@@ -24,6 +25,12 @@ export const extensionTabs = [
     label: "GitHub",
     icon: GitPullRequest,
     View: GithubView,
+  },
+  {
+    id: "research",
+    label: "Research",
+    icon: Telescope,
+    View: ResearchView,
   },
 ] as const satisfies readonly ExtensionTab[];
 

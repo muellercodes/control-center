@@ -56,12 +56,26 @@ function boundedTokens(value = 4_000) {
   return Math.min(8_000, Math.max(500, Math.round(value)));
 }
 
+/**
+ * A web-research call runs several searches server-side before it answers, so
+ * it needs far longer than a plain completion. 45s is ample for curation and
+ * reliably too short for research, which surfaced as a bogus "timed out — check
+ * that the service is running" when the service was in fact working.
+ */
+function providerTimeoutMs(provider: AiKeyProvider, webSearch?: boolean) {
+  if (isLocalAiProvider(provider)) return 120_000;
+  return webSearch ? 240_000 : 45_000;
+}
+
 async function providerFetch(
   provider: AiKeyProvider,
   url: string,
   init: RequestInit,
+  webSearch?: boolean,
 ) {
-  return aiProviderJson(provider, url, init, { timeoutMs: isLocalAiProvider(provider) ? 120_000 : 45_000 });
+  return aiProviderJson(provider, url, init, {
+    timeoutMs: providerTimeoutMs(provider, webSearch),
+  });
 }
 
 function openAiText(payload: Record<string, unknown>) {
@@ -127,7 +141,7 @@ async function runOpenAi(
           : { max_tokens: Math.min(4_096, boundedTokens(options.maxOutputTokens)) }),
         store: false,
       }),
-    }));
+    }, options.webSearch));
   }
   const payload = await providerFetch("openai", "https://api.openai.com/v1/responses", {
     method: "POST",
@@ -170,7 +184,7 @@ async function runAnthropic(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
-  });
+  }, options.webSearch);
   if (payload.stop_reason === "pause_turn" && Array.isArray(payload.content)) {
     payload = await providerFetch("anthropic", "https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -186,7 +200,7 @@ async function runAnthropic(
           { role: "assistant", content: payload.content },
         ],
       }),
-    });
+    }, options.webSearch);
   }
   return anthropicText(payload);
 }
@@ -215,6 +229,7 @@ async function runGemini(
         ...(options.webSearch ? { tools: [{ googleSearch: {} }] } : {}),
       }),
     },
+    options.webSearch,
   );
   return geminiText(payload);
 }
@@ -256,7 +271,7 @@ async function runLocalAi(settings: StoredSettings, provider: "lmstudio" | "olla
         // Omit keep_alive: retain Ollama's user-configured server/runner lifetime.
         : { options: { num_predict: outputTokens, num_ctx: contextLength }, truncate: false, shift: false }),
     }),
-  });
+  }, options.webSearch);
   const choices = Array.isArray(payload.choices) ? payload.choices : [];
   const finish = provider === "lmstudio"
     ? (choices[0] as { finish_reason?: unknown } | undefined)?.finish_reason

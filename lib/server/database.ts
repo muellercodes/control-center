@@ -16,7 +16,10 @@ import { initializeBriefStore } from "@/lib/brief-store";
 import { initializeIndustryStore } from "@/lib/industry-store";
 import { initializeCollectorCache } from "@/lib/collector-cache";
 import { initializeNewsletterStore } from "@/lib/newsletter-store";
-import { initializeExtensionStore } from "@/lib/extensions/store";
+import {
+  initializeExtensionStore,
+  initializeShortlistStore,
+} from "@/lib/extensions/store";
 
 export { setContentArchived } from "@/lib/archive-store";
 export type { ContentCategory } from "@/lib/archive-store";
@@ -55,12 +58,14 @@ export function getDatabase() {
       database.exec(`VACUUM INTO '${backupPath.replaceAll("'", "''")}'`);
       chmodSync(backupPath, 0o600);
     }
-    const initialized = initializeExtensionStore(
-      initializeNewsletterStore(
-        initializeCollectorCache(
-          initializeIndustryStore(
-            initializeBriefStore(
-              initializeWorkspaceStore(initializeContentStore(database)),
+    const initialized = initializeShortlistStore(
+      initializeExtensionStore(
+        initializeNewsletterStore(
+          initializeCollectorCache(
+            initializeIndustryStore(
+              initializeBriefStore(
+                initializeWorkspaceStore(initializeContentStore(database)),
+              ),
             ),
           ),
         ),
