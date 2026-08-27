@@ -10,15 +10,6 @@ import {
   isRepositorySlug,
 } from "@/lib/extensions/github";
 import {
-  cleanCalendarIds,
-  cleanWorkingHours,
-  isCalendarId,
-} from "@/lib/extensions/calendar";
-import {
-  GOOGLE_OAUTH_CLIENT_ID_ERROR,
-  isGoogleOAuthClientId,
-} from "@/lib/google-oauth";
-import {
   emptyExtensionSettings,
   type ExtensionSettings,
   type ExtensionSettingsUpdate,
@@ -32,27 +23,12 @@ import {
  * that knows nothing about extensions simply ignores the file.
  */
 
-export type StoredExtensionSettings = ExtensionSettings & {
+type StoredExtensionSettings = ExtensionSettings & {
   github: ExtensionSettings["github"] & { token: string };
-  calendar: ExtensionSettings["calendar"] & {
-    googleClientSecret: string;
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresAt: number;
-    connectedEmail: string;
-  };
 };
 
 const storedDefaults: StoredExtensionSettings = {
   github: { ...emptyExtensionSettings.github, token: "" },
-  calendar: {
-    ...emptyExtensionSettings.calendar,
-    googleClientSecret: "",
-    accessToken: "",
-    refreshToken: "",
-    accessTokenExpiresAt: 0,
-    connectedEmail: "",
-  },
 };
 
 let writeQueue: Promise<unknown> = Promise.resolve();
@@ -95,29 +71,6 @@ export async function readExtensionSettings(): Promise<StoredExtensionSettings> 
             )
           : [],
         token: cleanText(parsed.github?.token),
-      },
-      calendar: {
-        ...storedDefaults.calendar,
-        ...parsed.calendar,
-        googleClientId: cleanText(parsed.calendar?.googleClientId),
-        googleClientSecret: cleanText(parsed.calendar?.googleClientSecret),
-        accessToken: cleanText(parsed.calendar?.accessToken),
-        refreshToken: cleanText(parsed.calendar?.refreshToken),
-        connectedEmail: cleanText(parsed.calendar?.connectedEmail),
-        accessTokenExpiresAt:
-          typeof parsed.calendar?.accessTokenExpiresAt === "number"
-            ? parsed.calendar.accessTokenExpiresAt
-            : 0,
-        calendarIds: Array.isArray(parsed.calendar?.calendarIds)
-          ? parsed.calendar.calendarIds.filter(
-              (entry): entry is string =>
-                typeof entry === "string" && isCalendarId(entry),
-            )
-          : [],
-        workingHours: {
-          ...storedDefaults.calendar.workingHours,
-          ...parsed.calendar?.workingHours,
-        },
       },
     };
   } catch (error) {
@@ -172,17 +125,6 @@ export function toPublicExtensionSettings(
           ? "environment"
           : "none",
     },
-    calendar: {
-      googleClientId: settings.calendar.googleClientId,
-      calendarIds: settings.calendar.calendarIds,
-      workingHours: settings.calendar.workingHours,
-      minimumBlockMinutes: settings.calendar.minimumBlockMinutes,
-      contextSwitchMinutes: settings.calendar.contextSwitchMinutes,
-      allDayBlocksDay: settings.calendar.allDayBlocksDay,
-      googleClientSecretSet: Boolean(settings.calendar.googleClientSecret),
-      connected: Boolean(settings.calendar.refreshToken),
-      connectedEmail: settings.calendar.connectedEmail,
-    },
   };
 }
 
@@ -198,20 +140,6 @@ export async function applyExtensionSettingsUpdate(
   const token = cleanText(incoming?.token).trim();
   if (token && !/^[A-Za-z0-9_.-]{20,255}$/.test(token))
     throw new Error("That does not look like a GitHub personal access token.");
-
-  const calendar = update.calendar;
-  const clientId = cleanText(
-    calendar?.googleClientId,
-    existing.calendar.googleClientId,
-  ).trim();
-  if (clientId && !isGoogleOAuthClientId(clientId))
-    throw new Error(GOOGLE_OAUTH_CLIENT_ID_ERROR);
-  const clientSecret = cleanText(calendar?.googleClientSecret).trim();
-
-  const boundedMinutes = (value: unknown, fallback: number, max: number) =>
-    typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= max
-      ? value
-      : fallback;
 
   const next: StoredExtensionSettings = {
     github: {
@@ -233,64 +161,7 @@ export async function applyExtensionSettingsUpdate(
       ),
       token: incoming?.clearToken ? "" : token || existing.github.token,
     },
-    calendar: {
-      ...existing.calendar,
-      googleClientId: clientId,
-      googleClientSecret: clientSecret || existing.calendar.googleClientSecret,
-      calendarIds: calendar
-        ? cleanCalendarIds(calendar.calendarIds)
-        : existing.calendar.calendarIds,
-      workingHours: calendar
-        ? cleanWorkingHours(calendar.workingHours, existing.calendar.workingHours)
-        : existing.calendar.workingHours,
-      minimumBlockMinutes: boundedMinutes(
-        calendar?.minimumBlockMinutes,
-        existing.calendar.minimumBlockMinutes,
-        240,
-      ),
-      contextSwitchMinutes: boundedMinutes(
-        calendar?.contextSwitchMinutes,
-        existing.calendar.contextSwitchMinutes,
-        60,
-      ),
-      allDayBlocksDay: cleanBoolean(
-        calendar?.allDayBlocksDay,
-        existing.calendar.allDayBlocksDay,
-      ),
-    },
   };
   await writeExtensionSettings(next);
   return toPublicExtensionSettings(next);
-}
-
-/** Persists Google Calendar OAuth tokens without disturbing other settings. */
-export async function saveCalendarTokens(tokens: {
-  email?: string;
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt: number;
-}) {
-  return serializeWrite(async () => {
-    const settings = await readExtensionSettings();
-    settings.calendar.accessToken = tokens.accessToken;
-    settings.calendar.accessTokenExpiresAt = tokens.expiresAt;
-    if (tokens.email) settings.calendar.connectedEmail = tokens.email;
-    // A refresh grant returns no new refresh token; keep the existing one.
-    if (tokens.refreshToken) settings.calendar.refreshToken = tokens.refreshToken;
-    await writeUnlocked(settings);
-    return settings;
-  });
-}
-
-/** Forgets the Google connection but keeps the client credentials. */
-export async function disconnectCalendar() {
-  return serializeWrite(async () => {
-    const settings = await readExtensionSettings();
-    settings.calendar.accessToken = "";
-    settings.calendar.refreshToken = "";
-    settings.calendar.accessTokenExpiresAt = 0;
-    settings.calendar.connectedEmail = "";
-    await writeUnlocked(settings);
-    return settings;
-  });
 }

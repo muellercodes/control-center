@@ -1935,7 +1935,6 @@ function TasksView({
   const [description, setDescription] = useState("");
   const [due, setDue] = useState(localDateValue);
   const [recurrence, setRecurrence] = useState("One-time");
-  const [estimateMinutes, setEstimateMinutes] = useState(30);
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!title.trim() || !due) return;
@@ -1948,7 +1947,6 @@ function TasksView({
         recurrence,
         priority: "Normal",
         done: false,
-        estimateMinutes,
         createdAt: new Date().toISOString(),
       },
       ...values,
@@ -1957,7 +1955,6 @@ function TasksView({
     setDescription("");
     setDue(localDateValue());
     setRecurrence("One-time");
-    setEstimateMinutes(30);
     setShowForm(false);
   };
   const complete = (task: Task) =>
@@ -2030,22 +2027,6 @@ function TasksView({
                 <option>Daily</option>
                 <option>Weekly</option>
                 <option>Monthly</option>
-              </select>
-            </label>
-            <label>
-              Effort
-              <select
-                value={estimateMinutes}
-                onChange={(event) =>
-                  setEstimateMinutes(Number(event.target.value))
-                }
-              >
-                <option value={15}>15 min</option>
-                <option value={30}>30 min</option>
-                <option value={60}>1 hour</option>
-                <option value={90}>1.5 hours</option>
-                <option value={120}>2 hours</option>
-                <option value={240}>Half a day</option>
               </select>
             </label>
           </div>

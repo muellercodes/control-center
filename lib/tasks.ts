@@ -185,13 +185,6 @@ export function cleanTaskItems(value: unknown): TaskItem[] {
         typeof candidate.seriesId === "number"
           ? candidate.seriesId
           : undefined,
-      estimateMinutes:
-        typeof candidate.estimateMinutes === "number" &&
-        Number.isFinite(candidate.estimateMinutes) &&
-        candidate.estimateMinutes > 0 &&
-        candidate.estimateMinutes <= 24 * 60
-          ? Math.round(candidate.estimateMinutes)
-          : undefined,
       recurrenceAnchorDay:
         typeof candidate.recurrenceAnchorDay === "number" &&
         Number.isInteger(candidate.recurrenceAnchorDay) &&
