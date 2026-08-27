@@ -104,6 +104,12 @@ export function canonicalizePublicProfileUrl(platform: AudiencePlatform, value: 
     if (["pages", "people"].includes(root) && parts.length === 3 && cleanHandle(parts[1]) && cleanHandle(parts[2])) {
       return `https://www.facebook.com/${root}/${canonicalPath([parts[1], parts[2]])}/`;
     }
+    // Facebook redirects profile.php?id=… to this newer page form when signed
+    // out, so it has to canonicalize too or the identity check rejects its own
+    // redirect target.
+    if (root === "p" && parts.length === 2 && cleanHandle(parts[1])) {
+      return `https://www.facebook.com/p/${canonicalPath([parts[1]])}/`;
+    }
     if (parts.length !== 1) return null;
     const handle = cleanHandle(parts[0]);
     if (!handle || reservedHandles.facebook?.has(handle.toLowerCase())) return null;
@@ -199,12 +205,39 @@ function normalizedEmbeddedText(value: string) {
   return decodeHtmlEntities(value).replaceAll("\\u00a0", " ").replaceAll("\\u2022", " • ");
 }
 
+/**
+ * The numeric page id behind either Facebook URL spelling:
+ * `profile.php?id=123…` and `/p/Name-123…/` denote the same page.
+ * Ids are long, so a slug merely ending in a short number is not mistaken
+ * for one.
+ */
+export function facebookNumericId(canonicalUrl: string) {
+  const url = new URL(canonicalUrl);
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts[0] === "profile.php") {
+    const id = url.searchParams.get("id") || "";
+    return /^\d{5,}$/.test(id) ? id : "";
+  }
+  if (parts[0] === "p" && parts[1]) {
+    const trailing = parts[1].split("-").pop() || "";
+    return /^\d{10,}$/.test(trailing) ? trailing : "";
+  }
+  if (["pages", "people"].includes(parts[0]) && parts[2]) {
+    return /^\d{5,}$/.test(parts[2]) ? parts[2] : "";
+  }
+  return "";
+}
+
 function profileComparisonKey(platform: AudiencePlatform, value: string) {
   const canonical = canonicalizePublicProfileUrl(platform, value);
   if (!canonical) return "";
   if (platform === "youtube") {
     const parts = new URL(canonical).pathname.split("/").filter(Boolean);
     if (parts[0] === "channel") return `youtube|channel|${parts[1]}`;
+  }
+  if (platform === "facebook") {
+    const id = facebookNumericId(canonical);
+    if (id) return `facebook|id|${id}`;
   }
   return canonical.toLowerCase();
 }

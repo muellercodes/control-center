@@ -18,6 +18,7 @@ import { fetchPinned } from "@/lib/server/pinned-fetch";
 import {
   audienceAccountFingerprint,
   audienceCacheWindowMs,
+  facebookNumericId,
   linkedInHttpError,
   parseFacebookPublicProfile,
   parseLinkedInPublicProfile,
@@ -128,12 +129,7 @@ function requiredMetricCount(provider: string, label: string, value: unknown) {
 
 function facebookProfileId(value: string) {
   const canonical = resolvePublicProfileUrl("facebook", value, "");
-  if (!canonical) return "";
-  const url = new URL(canonical);
-  const parts = url.pathname.split("/").filter(Boolean);
-  if (parts[0] === "profile.php") return url.searchParams.get("id") || "";
-  if (["pages", "people"].includes(parts[0])) return parts[2] || "";
-  return "";
+  return canonical ? facebookNumericId(canonical) : "";
 }
 
 function publicProfileUrl(account: Account) {
