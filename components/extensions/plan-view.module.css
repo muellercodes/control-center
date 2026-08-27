@@ -1,0 +1,197 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 22px 24px;
+}
+
+.hero h2 {
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 28px;
+}
+
+.heroMinutes {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.heroDetail {
+  margin: 8px 0 0;
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.heroStats {
+  display: flex;
+  gap: 26px;
+}
+
+.heroStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heroStats b {
+  font-family: var(--mono);
+  font-size: 17px;
+}
+
+.heroStats span {
+  color: var(--faint);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.note {
+  margin-top: 14px;
+  padding: 14px 18px;
+}
+
+.note p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.note p + p {
+  margin-top: 6px;
+}
+
+.spill,
+.deferred {
+  margin-top: 18px;
+  padding: 18px 20px;
+}
+
+.spill ul,
+.deferred ul {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.spill li,
+.deferred li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.spill li small,
+.deferred li small {
+  margin-left: auto;
+  color: var(--faint);
+  font-size: 9px;
+}
+
+.deferredHint {
+  margin: 6px 0 0;
+  max-width: 60ch;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* Compact rows, deliberately not .story-card: that class carries a 205px
+   min-height and right-aligns its first label, both of which suit dense
+   article cards rather than a scannable task list. */
+.taskRow {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-strong);
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.taskRow:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-dark);
+}
+
+.taskIndex {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid var(--line);
+  color: var(--line-dark);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.taskBody {
+  padding: 13px 18px;
+}
+
+.taskBody h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.taskBody p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.taskTime,
+.taskTag,
+.taskOverdue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.taskTime {
+  color: var(--teal);
+  border-color: color-mix(in srgb, var(--teal) 45%, var(--line));
+}
+
+.taskTag {
+  color: var(--faint);
+}
+
+.taskOverdue {
+  color: var(--warning);
+  border-color: var(--warning-border);
+  background: var(--warning-bg);
+}

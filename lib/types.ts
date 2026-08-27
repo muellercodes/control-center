@@ -273,6 +273,8 @@ export type TaskItem = {
   completedAt?: string;
   seriesId?: string | number;
   recurrenceAnchorDay?: number;
+  /** Expected effort in minutes. Absent means "fall back to a default". */
+  estimateMinutes?: number;
 };
 
 export type WorkspaceState = {

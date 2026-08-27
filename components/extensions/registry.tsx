@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarClock, GitPullRequest } from "lucide-react";
+import { CalendarClock, GitPullRequest, Target } from "lucide-react";
 import { CalendarView } from "./calendar-view";
 import { GithubView } from "./github-view";
+import { PlanView } from "./plan-view";
 
 /**
  * The single place local tabs are declared.
@@ -20,6 +21,12 @@ export type ExtensionTab = {
 };
 
 export const extensionTabs = [
+  {
+    id: "plan",
+    label: "Plan",
+    icon: Target,
+    View: PlanView,
+  },
   {
     id: "github",
     label: "GitHub",
